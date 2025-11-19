@@ -159,67 +159,113 @@ struct NewGameSheet: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 30) {
-                Spacer()
-                
-                // Icon
-                Image(systemName: "map.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(.blue)
-                
-                // Description
-                Text("Start a new city on a randomly generated island")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                // Seed options
-                VStack(spacing: 15) {
-                    Toggle("Use Custom Seed", isOn: $useCustomSeed)
-                        .padding(.horizontal)
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    // Left side: Visual and description
+                    VStack(spacing: 20) {
+                        Spacer()
+                        
+                        // Icon
+                        Image(systemName: "map.fill")
+                            .font(.system(size: 100))
+                            .foregroundColor(.blue)
+                        
+                        // Description
+                        VStack(spacing: 10) {
+                            Text("New Island")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            
+                            Text("Start a new city on a randomly generated island")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.horizontal, 30)
+                        
+                        Spacer()
+                    }
+                    .frame(width: geometry.size.width * 0.45)
                     
-                    if useCustomSeed {
-                        TextField("Enter seed (number)", text: $customSeed)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
-                            .padding(.horizontal)
+                    // Right side: Options and button
+                    VStack(spacing: 30) {
+                        Spacer()
+                        
+                        // Seed options
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text("Map Generation")
+                                .font(.headline)
+                            
+                            Toggle("Use Custom Seed", isOn: $useCustomSeed)
+                                .toggleStyle(SwitchToggleStyle(tint: .blue))
+                            
+                            if useCustomSeed {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Seed Number")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    
+                                    TextField("Enter seed (e.g., 123456)", text: $customSeed)
+                                        .textFieldStyle(.roundedBorder)
+                                        .keyboardType(.numberPad)
+                                        .font(.system(.body, design: .monospaced))
+                                }
+                            } else {
+                                Text("A random seed will be generated")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(20)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        
+                        Spacer()
+                        
+                        // Start button
+                        Button {
+                            let seed: Int?
+                            if useCustomSeed, let seedValue = Int(customSeed) {
+                                seed = seedValue
+                            } else {
+                                seed = nil
+                            }
+                            onStart(seed)
+                        } label: {
+                            HStack {
+                                Image(systemName: "play.fill")
+                                Text("Start Game")
+                                    .fontWeight(.semibold)
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                        }
                     }
+                    .frame(width: geometry.size.width * 0.5)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 20)
                 }
-                
-                Spacer()
-                
-                // Start button
-                Button {
-                    let seed: Int?
-                    if useCustomSeed, let seedValue = Int(customSeed) {
-                        seed = seedValue
-                    } else {
-                        seed = nil
-                    }
-                    onStart(seed)
-                } label: {
-                    Text("Start Game")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(15)
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 30)
             }
             .navigationTitle("New Game")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button {
                         dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "xmark.circle.fill")
+                            Text("Cancel")
+                        }
                     }
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

@@ -12,37 +12,40 @@ struct EventModalView: View {
     let onChoice: (EventChoice) -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             // Title
             Text(event.title)
-                .font(.title)
+                .font(.title3)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor)
             
             // Description
             Text(event.description)
-                .font(.body)
+                .font(.subheadline)
                 .multilineTextAlignment(.center)
                 .foregroundColor(textColor.opacity(0.9))
-                .padding(.horizontal)
+                .lineLimit(3)
+                .padding(.horizontal, 8)
             
             Divider()
                 .background(textColor.opacity(0.3))
+                .padding(.vertical, 4)
             
             // Choices
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 ForEach(event.choices, id: \.id) { choice in
                     Button {
                         onChoice(choice)
                     } label: {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             Text(choice.text)
-                                .font(.headline)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
                                 .foregroundColor(textColor)
                             
                             // Show effects
-                            HStack(spacing: 12) {
+                            HStack(spacing: 10) {
                                 if let money = choice.moneyChange, money != 0 {
                                     EffectLabel(
                                         value: money,
@@ -68,10 +71,10 @@ struct EventModalView: View {
                                     )
                                 }
                             }
-                            .font(.caption)
+                            .font(.caption2)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
+                        .padding(12)
                         .background(textColor.opacity(0.15))
                         .cornerRadius(8)
                     }
@@ -79,11 +82,12 @@ struct EventModalView: View {
                 }
             }
         }
-        .padding(24)
+        .padding(20)
+        .frame(maxWidth: 500)
         .background(backgroundColor)
         .cornerRadius(16)
         .shadow(radius: 20)
-        .padding(40)
+        .padding(30)
     }
     
     /// Background color based on event type
