@@ -1,0 +1,262 @@
+{
+  "events": [
+    {
+      "id": "protest_stability",
+      "title": "Citizens Protest",
+      "description": "Citizens are protesting against recent policies. How will you respond?",
+      "type": "riot",
+      "minPopulation": 10,
+      "minStability": 0,
+      "maxStability": 60,
+      "choices": [
+        {
+          "text": "Negotiate with protesters",
+          "stabilityChange": 15,
+          "moneyChange": -200
+        },
+        {
+          "text": "Send in military to disperse",
+          "stabilityChange": -25,
+          "moneyChange": 0
+        },
+        {
+          "text": "Ignore them",
+          "stabilityChange": -10,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "economic_boom",
+      "title": "Economic Boom!",
+      "description": "Foreign investors are interested in your city!",
+      "type": "good",
+      "minPopulation": 20,
+      "minCommercial": 2,
+      "choices": [
+        {
+          "text": "Welcome investors",
+          "stabilityChange": 10,
+          "moneyChange": 500
+        },
+        {
+          "text": "Negotiate better terms",
+          "stabilityChange": 5,
+          "moneyChange": 300
+        },
+        {
+          "text": "Reject foreign capital",
+          "stabilityChange": -5,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "neighbor_tension",
+      "title": "Border Tension",
+      "description": "A neighboring country is mobilizing troops near your border.",
+      "type": "political",
+      "minPopulation": 5,
+      "choices": [
+        {
+          "text": "Build up military defenses",
+          "stabilityChange": -10,
+          "moneyChange": -400,
+          "worldTensionChange": 15
+        },
+        {
+          "text": "Seek diplomatic solution",
+          "stabilityChange": 5,
+          "moneyChange": -100,
+          "worldTensionChange": -5
+        },
+        {
+          "text": "Do nothing",
+          "stabilityChange": -15,
+          "moneyChange": 0,
+          "worldTensionChange": 5
+        }
+      ]
+    },
+    {
+      "id": "unemployment_crisis",
+      "title": "Rising Unemployment",
+      "description": "Many citizens cannot find work. The unemployment rate is concerning.",
+      "type": "riot",
+      "minPopulation": 15,
+      "minUnemployment": 10,
+      "choices": [
+        {
+          "text": "Create public works program",
+          "stabilityChange": 20,
+          "moneyChange": -300
+        },
+        {
+          "text": "Provide welfare benefits",
+          "stabilityChange": 10,
+          "moneyChange": -200
+        },
+        {
+          "text": "Let market solve it",
+          "stabilityChange": -15,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "park_demand",
+      "title": "Citizens Demand Green Spaces",
+      "description": "Your growing population wants parks and recreation areas.",
+      "type": "neutral",
+      "minPopulation": 30,
+      "maxParks": 2,
+      "choices": [
+        {
+          "text": "Build new parks",
+          "stabilityChange": 15,
+          "moneyChange": -250
+        },
+        {
+          "text": "Promise future development",
+          "stabilityChange": 0,
+          "moneyChange": 0
+        },
+        {
+          "text": "Deny request",
+          "stabilityChange": -10,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "trade_deal",
+      "title": "Trade Agreement Offer",
+      "description": "A regional trade bloc invites your nation to join.",
+      "type": "political",
+      "minPopulation": 25,
+      "minIndustrial": 2,
+      "choices": [
+        {
+          "text": "Join the trade bloc",
+          "stabilityChange": 10,
+          "moneyChange": 400,
+          "worldTensionChange": -10
+        },
+        {
+          "text": "Negotiate independently",
+          "stabilityChange": 0,
+          "moneyChange": 200,
+          "worldTensionChange": 0
+        },
+        {
+          "text": "Remain isolated",
+          "stabilityChange": -5,
+          "moneyChange": 0,
+          "worldTensionChange": 5
+        }
+      ]
+    },
+    {
+      "id": "natural_disaster",
+      "title": "Natural Disaster!",
+      "description": "A severe storm has damaged parts of your city.",
+      "type": "riot",
+      "minPopulation": 10,
+      "choices": [
+        {
+          "text": "Full emergency response",
+          "stabilityChange": 15,
+          "moneyChange": -500
+        },
+        {
+          "text": "Basic aid only",
+          "stabilityChange": 5,
+          "moneyChange": -200
+        },
+        {
+          "text": "Minimal response",
+          "stabilityChange": -20,
+          "moneyChange": -50
+        }
+      ]
+    },
+    {
+      "id": "housing_boom",
+      "title": "Housing Development Opportunity",
+      "description": "Developers want to build new residential areas in your city.",
+      "type": "good",
+      "minPopulation": 20,
+      "minResidential": 3,
+      "populationNearCap": true,
+      "choices": [
+        {
+          "text": "Approve development",
+          "stabilityChange": 10,
+          "moneyChange": 300
+        },
+        {
+          "text": "Regulate development",
+          "stabilityChange": 5,
+          "moneyChange": 150
+        },
+        {
+          "text": "Block development",
+          "stabilityChange": -10,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "tech_investment",
+      "title": "Technology Investment",
+      "description": "A tech company wants to open a factory in your city.",
+      "type": "good",
+      "minPopulation": 40,
+      "minIndustrial": 3,
+      "choices": [
+        {
+          "text": "Offer tax incentives",
+          "stabilityChange": 5,
+          "moneyChange": 600
+        },
+        {
+          "text": "Standard agreement",
+          "stabilityChange": 10,
+          "moneyChange": 400
+        },
+        {
+          "text": "Reject the offer",
+          "stabilityChange": 0,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "crime_wave",
+      "title": "Crime Wave",
+      "description": "Crime rates are rising. Citizens feel unsafe.",
+      "type": "riot",
+      "minPopulation": 25,
+      "minStability": 0,
+      "maxStability": 50,
+      "choices": [
+        {
+          "text": "Increase police presence",
+          "stabilityChange": 20,
+          "moneyChange": -300
+        },
+        {
+          "text": "Community programs",
+          "stabilityChange": 15,
+          "moneyChange": -150
+        },
+        {
+          "text": "Do nothing",
+          "stabilityChange": -25,
+          "moneyChange": 0
+        }
+      ]
+    }
+  ]
+}
+

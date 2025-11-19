@@ -1,0 +1,156 @@
+//
+//  GameState.swift
+//  GridNation
+//
+//  Observable game state that manages the simulation loop
+//
+
+import Foundation
+import Combine
+internal import CoreGraphics
+
+/// The main game state observable by SwiftUI views
+/// Uses @Observable macro for modern SwiftUI state management
+@Observable
+class GameState {
+    var world: World
+    var isPaused: Bool
+    var speed: Double  // Multiplier: 0, 1, 2, 3
+    var gridScene: CityGridScene?  // Reference to SpriteKit scene for updates
+    
+    // Tile selector menu state
+    var showTileSelector: Bool = false
+    var tileSelectorPosition: CGPoint = .zero
+    var selectedTileCoordinates: (x: Int, y: Int)?
+    
+    private var lastTickTime: Date
+    private var tickTimer: Timer?
+    private var eventSpawnCounter: Double = 0
+    
+    init() {
+        self.world = World()
+        self.isPaused = false
+        self.speed = 1.0
+        self.lastTickTime = Date()
+        
+        startSimulation()
+    }
+    
+    /// Start the simulation timer
+    func startSimulation() {
+        // Timer fires every 0.5 seconds (optimized for performance)
+        // Less frequent updates = better performance
+        tickTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            self?.tick()
+        }
+    }
+    
+    /// Stop the simulation timer
+    func stopSimulation() {
+        tickTimer?.invalidate()
+        tickTimer = nil
+    }
+    
+    /// Execute one simulation tick
+    private func tick() {
+        guard !isPaused, speed > 0 else { return }
+        
+        let now = Date()
+        let deltaTime = now.timeIntervalSince(lastTickTime)
+        lastTickTime = now
+        
+        // Apply speed multiplier
+        let effectiveDelta = deltaTime * speed
+        
+        // Simulate world
+        world.simulate(deltaTime: effectiveDelta)
+        
+        // Check for event spawning (roughly every 10-15 seconds of real time)
+        eventSpawnCounter += deltaTime
+        if eventSpawnCounter >= 10.0 {
+            world.spawnEventIfNeeded()
+            eventSpawnCounter = 0
+        }
+//        world.spawnEventIfNeeded()
+    }
+    
+    /// Toggle between play speeds: 0x → 1x → 2x → 3x → 0x
+    func cycleSpeed() {
+        if isPaused {
+            isPaused = false
+            speed = 1.0
+        } else {
+            switch speed {
+            case 1.0:
+                speed = 2.0
+            case 2.0:
+                speed = 3.0
+            case 3.0:
+                isPaused = true
+                speed = 1.0
+            default:
+                speed = 1.0
+            }
+        }
+    }
+    
+    /// Toggle pause/unpause
+    func togglePause() {
+        isPaused.toggle()
+    }
+    
+    /// Set a specific speed
+    func setSpeed(_ newSpeed: Double) {
+        speed = max(0, min(3, newSpeed))
+        isPaused = speed == 0
+    }
+    
+    /// Show tile selector menu at position
+    func showTileSelectorMenu(at position: CGPoint, for x: Int, y: Int) {
+        guard let tile = world.city.tile(at: x, y: y) else { return }
+        
+        // Don't allow changing terrain tiles
+        guard !tile.type.isTerrain else { return }
+        
+        tileSelectorPosition = position
+        selectedTileCoordinates = (x, y)
+        showTileSelector = true
+        
+        // Disable map interaction
+        print("Setting isMenuActive = true")
+        gridScene?.isMenuActive = true
+    }
+    
+    /// Hide tile selector menu
+    func hideTileSelector() {
+        showTileSelector = false
+        selectedTileCoordinates = nil
+        
+        // Re-enable map interaction
+        print("Setting isMenuActive = false")
+        gridScene?.isMenuActive = false
+    }
+    
+    /// Place selected tile type at stored coordinates
+    func placeTile(_ tileType: TileType) {
+        guard let coords = selectedTileCoordinates else { return }
+        
+        world.city.setTile(at: coords.x, y: coords.y, type: tileType)
+        
+        // Update SpriteKit scene immediately for responsive feedback
+        gridScene?.updateTile(at: coords.x, y: coords.y, type: tileType)
+        
+        hideTileSelector()
+    }
+    
+    /// Handle event choice selection
+    func selectEventChoice(_ choice: EventChoice) {
+        world.resolveEvent(with: choice)
+        
+        // Ensure map interaction is enabled after event
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.gridScene?.isMenuActive = false
+        }
+    }
+}
+
