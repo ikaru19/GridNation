@@ -174,6 +174,13 @@ struct DetailedStatsView: View {
                         StatRow(label: "Total Built", value: "\(totalBuiltTiles)")
                     }
                     
+                    // Territory & Borders
+                    StatSection(title: "Territory", icon: "map.fill", color: .cyan) {
+                        StatRow(label: "Territory Size", value: "\(city.territoryBorder.count) tiles")
+                        StatRow(label: "Border Perimeter", value: "\(city.calculateBorderPerimeter()) tiles")
+                        StatRow(label: "Border Security", value: borderSecurityStatus)
+                    }
+                    
                     // Happiness & Stability
                     StatSection(title: "Happiness", icon: "heart.fill", color: .red) {
                         StatRow(label: "Stability", value: String(format: "%.1f%%", city.stability))
@@ -263,6 +270,24 @@ struct DetailedStatsView: View {
         if globalState.worldTension < 30 { return "🕊️ Peaceful" }
         if globalState.worldTension < 60 { return "⚠️ Tense" }
         return "⚔️ Hostile"
+    }
+    
+    private var borderSecurityStatus: String {
+        let military = city.countTiles(of: .military)
+        let borderPerimeter = city.calculateBorderPerimeter()
+        
+        guard borderPerimeter > 0 else { return "No borders yet" }
+        
+        let securedTiles = military * 10
+        let securityPercent = (Double(securedTiles) / Double(borderPerimeter)) * 100.0
+        
+        if securityPercent >= 100 {
+            return "🛡️ Secured (\(Int(securityPercent))%)"
+        } else if securityPercent >= 70 {
+            return "⚠️ Moderate (\(Int(securityPercent))%)"
+        } else {
+            return "❌ Vulnerable (\(Int(securityPercent))%)"
+        }
     }
 }
 

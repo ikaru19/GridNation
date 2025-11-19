@@ -7,6 +7,12 @@
 
 import Foundation
 
+/// Coordinate for a tile position
+struct TileCoordinate: Codable, Hashable {
+    let x: Int
+    let y: Int
+}
+
 /// The player's city with a grid of tiles
 struct City: Codable {
     var name: String
@@ -14,6 +20,7 @@ struct City: Codable {
     var money: Double
     var population: Int
     var stability: Double  // 0-100, higher is better
+    var territoryBorder: Set<TileCoordinate> = []  // Tiles at the border of your territory
     
     let gridWidth: Int
     let gridHeight: Int
@@ -153,6 +160,60 @@ struct City: Codable {
             }
         }
         return count
+    }
+    
+    /// Expand territory border when a new building is placed
+    mutating func expandTerritory(from x: Int, y: Int, radius: Int = 2) {
+        // Add the building tile itself
+        territoryBorder.insert(TileCoordinate(x: x, y: y))
+        
+        // Expand border in a radius around the building
+        for dy in -radius...radius {
+            for dx in -radius...radius {
+                let newX = x + dx
+                let newY = y + dy
+                
+                // Check if within grid bounds
+                guard newX >= 0, newX < gridWidth, newY >= 0, newY < gridHeight else { continue }
+                
+                // Calculate distance (Manhattan distance for more natural borders)
+                let distance = abs(dx) + abs(dy)
+                if distance <= radius {
+                    territoryBorder.insert(TileCoordinate(x: newX, y: newY))
+                }
+            }
+        }
+    }
+    
+    /// Check if a tile is within your territory border
+    func isWithinTerritory(x: Int, y: Int) -> Bool {
+        return territoryBorder.contains(TileCoordinate(x: x, y: y))
+    }
+    
+    /// Calculate total border perimeter (for military calculations)
+    func calculateBorderPerimeter() -> Int {
+        var perimeterTiles = 0
+        
+        for coord in territoryBorder {
+            // Check if this tile is on the edge of territory
+            let neighbors = [
+                (coord.x - 1, coord.y),
+                (coord.x + 1, coord.y),
+                (coord.x, coord.y - 1),
+                (coord.x, coord.y + 1)
+            ]
+            
+            // If any neighbor is outside territory, this is a border tile
+            for (nx, ny) in neighbors {
+                if nx < 0 || nx >= gridWidth || ny < 0 || ny >= gridHeight ||
+                   !territoryBorder.contains(TileCoordinate(x: nx, y: ny)) {
+                    perimeterTiles += 1
+                    break
+                }
+            }
+        }
+        
+        return perimeterTiles
     }
 }
 

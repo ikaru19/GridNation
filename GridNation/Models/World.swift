@@ -116,15 +116,47 @@ struct World: Codable {
         // Apply stability changes (clamped to 0-100)
         city.stability = max(0, min(100, city.stability + stabilityChange))
         
-        // World tension gradually increases
-        globalState.worldTension += 0.5 * deltaTime
-        globalState.worldTension = min(100, globalState.worldTension)
+        // World tension system - based on border security and diplomatic relations
+        var tensionChange = 0.0
         
-        // Military presence reduces world tension slightly
-        if military > 3 {
-            globalState.worldTension -= Double(military) * 0.1 * deltaTime
-            globalState.worldTension = max(0, globalState.worldTension)
+        // Calculate actual border perimeter that needs defending
+        let borderPerimeter = city.calculateBorderPerimeter()
+        
+        // Each military building can secure 10 tiles of border
+        let securedBorderTiles = military * 10
+        
+        // Calculate border security percentage
+        let borderSecurity = borderPerimeter > 0 ? 
+            (Double(securedBorderTiles) / Double(borderPerimeter)) * 100.0 : 100.0
+        
+        // Unsecured borders create tension (neighbor countries may be hostile)
+        if borderSecurity < 100 {
+            let unsecuredPercent = (100.0 - borderSecurity) / 100.0
+            tensionChange += unsecuredPercent * 0.4 * deltaTime
         }
+        
+        // Over-secured borders reduce tension (deterrent effect)
+        if borderSecurity > 100 {
+            let excessSecurity = borderSecurity - 100.0
+            tensionChange -= (excessSecurity / 100.0) * 0.3 * deltaTime
+        }
+        
+        // High city stability improves diplomatic relations (peaceful reputation)
+        if city.stability > 70 {
+            tensionChange -= 0.2 * deltaTime
+        } else if city.stability < 30 {
+            // Low stability makes neighbors nervous (unstable neighbor = threat)
+            tensionChange += 0.15 * deltaTime
+        }
+        
+        // TODO: Future implementation - Sabotage events
+        // - Random sabotage attempts from hostile neighbors when tension > 70
+        // - Counter-intelligence buildings to prevent sabotage
+        // - Diplomatic missions to reduce tension
+        
+        // Apply tension changes (clamped to 0-100)
+        globalState.worldTension += tensionChange
+        globalState.worldTension = max(0, min(100, globalState.worldTension))
     }
     
     /// Spawn a random event (call this periodically)

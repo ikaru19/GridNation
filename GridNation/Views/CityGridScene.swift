@@ -40,6 +40,9 @@ class CityGridScene: SKScene {
     // Highlight for selected tile
     private var highlightNode: SKShapeNode?
     
+    // Border visualization
+    private var borderNodes: [SKShapeNode] = []
+    
     init(city: City, size: CGSize) {
         self.city = city
         super.init(size: size)
@@ -53,6 +56,9 @@ class CityGridScene: SKScene {
         setupCamera()
         
         setupGrid()
+        
+        // Draw initial borders if territory exists
+        updateBorderVisualization()
     }
     
     /// Setup camera for zoom and pan
@@ -131,15 +137,11 @@ class CityGridScene: SKScene {
         
         // Update color
         node.color = uiColor(for: type)
-        
-        // Update terrain overlay
-        node.removeAllChildren()
-        if type.isTerrain {
-            let overlay = SKSpriteNode(color: SKColor.black.withAlphaComponent(0.15), size: node.size)
-            overlay.position = CGPoint.zero
-            overlay.zPosition = 1
-            node.addChild(overlay)
-        }
+    }
+    
+    /// Update the city reference (needed for border calculations)
+    func updateCity(_ newCity: City) {
+        self.city = newCity
     }
     
     /// Handle touch/tap on tiles  
@@ -381,6 +383,73 @@ class CityGridScene: SKScene {
     /// Convert TileType to SKColor
     private func uiColor(for tileType: TileType) -> SKColor {
         return tileType.skColor
+    }
+    
+    /// Update border visualization - draws rectangles around each perimeter tile
+    func updateBorderVisualization() {
+        print("🔵 Updating border visualization...")
+        print("   Territory size: \(city.territoryBorder.count)")
+        
+        // Remove old border nodes
+        for node in borderNodes {
+            node.removeFromParent()
+        }
+        borderNodes.removeAll()
+        
+        guard city.territoryBorder.count > 0 else {
+            print("   No borders to draw")
+            return
+        }
+        
+        var borderTilesDrawn = 0
+        
+        // Draw a border rectangle around each perimeter tile
+        for coord in city.territoryBorder {
+            let x = coord.x
+            let y = coord.y
+            
+            // Check if this tile is on the perimeter (has at least one neighbor outside territory)
+            let neighbors = [
+                TileCoordinate(x: x - 1, y: y),
+                TileCoordinate(x: x + 1, y: y),
+                TileCoordinate(x: x, y: y - 1),
+                TileCoordinate(x: x, y: y + 1)
+            ]
+            
+            var isPerimeter = false
+            for neighbor in neighbors {
+                if neighbor.x < 0 || neighbor.x >= city.gridWidth || 
+                   neighbor.y < 0 || neighbor.y >= city.gridHeight ||
+                   !city.territoryBorder.contains(neighbor) {
+                    isPerimeter = true
+                    break
+                }
+            }
+            
+            if isPerimeter {
+                // Calculate tile position in screen coordinates
+                let tileX = CGFloat(x) * tileSize
+                let tileY = CGFloat(city.gridHeight - y - 1) * tileSize
+                
+                // Draw a rectangle outline around this perimeter tile
+                let rect = CGRect(x: tileX, y: tileY, width: tileSize, height: tileSize)
+                let borderRect = SKShapeNode(rect: rect)
+                borderRect.strokeColor = SKColor.systemBlue
+                borderRect.lineWidth = 6
+                borderRect.fillColor = .clear
+                borderRect.zPosition = 100
+                borderRect.isAntialiased = true
+                borderRect.lineCap = .square
+                borderRect.lineJoin = .miter
+                
+                addChild(borderRect)
+                borderNodes.append(borderRect)
+                borderTilesDrawn += 1
+            }
+        }
+        
+        print("   Border tiles drawn: \(borderTilesDrawn)")
+        print("   Border visualization complete!")
     }
 }
 

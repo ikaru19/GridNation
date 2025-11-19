@@ -112,6 +112,14 @@ class GameState {
         // Don't allow changing terrain tiles
         guard !tile.type.isTerrain else { return }
         
+        // Check if tile is within territory (allow building anywhere if no territory yet)
+        if world.city.territoryBorder.count > 0 && !world.city.isWithinTerritory(x: x, y: y) {
+            // Show a message that you can't build outside territory
+            print("Cannot build outside territory!")
+            // TODO: Show visual feedback to user
+            return
+        }
+        
         tileSelectorPosition = position
         selectedTileCoordinates = (x, y)
         showTileSelector = true
@@ -140,8 +148,32 @@ class GameState {
         
         world.city.setTile(at: coords.x, y: coords.y, type: tileType)
         
+        // Expand territory when placing a building (not empty tiles)
+        if tileType != .empty && !tileType.isTerrain {
+            // Different building types expand territory by different amounts
+            let expansionRadius: Int
+            switch tileType {
+            case .military:
+                expansionRadius = 4  // Military expands border the most
+            case .residential, .commercial, .industrial:
+                expansionRadius = 3  // Economic buildings expand moderately
+            case .park:
+                expansionRadius = 2  // Parks expand least
+            default:
+                expansionRadius = 2
+            }
+            
+            world.city.expandTerritory(from: coords.x, y: coords.y, radius: expansionRadius)
+        }
+        
         // Update SpriteKit scene immediately for responsive feedback
         gridScene?.updateTile(at: coords.x, y: coords.y, type: tileType)
+        
+        // Update city reference in scene (needed for border calculations)
+        gridScene?.updateCity(world.city)
+        
+        // Update border visualization
+        gridScene?.updateBorderVisualization()
         
         print("Tile placed, hiding selector...")
         hideTileSelector()
