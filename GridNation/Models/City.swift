@@ -50,20 +50,52 @@ struct City: Codable {
         // Use seed for reproducible generation
         var rng = SeededRandomGenerator(seed: seed)
         
-        // Generate moderate number of terrain features (scales better)
-        let waterBodies = rng.randomInt(in: 8...15)
+        // First, make all borders water to create an island
+        for x in 0..<gridWidth {
+            // Top and bottom borders
+            tiles[0][x].type = .water
+            tiles[gridHeight - 1][x].type = .water
+        }
+        for y in 0..<gridHeight {
+            // Left and right borders
+            tiles[y][0].type = .water
+            tiles[y][gridWidth - 1].type = .water
+        }
+        
+        // Add some extra water depth (2-3 tiles deep) for more natural coastline
+        let borderDepth = rng.randomInt(in: 2...3)
+        for depth in 1..<borderDepth {
+            for x in depth..<(gridWidth - depth) {
+                // Top and bottom
+                if rng.randomDouble(in: 0...1) > 0.3 {
+                    tiles[depth][x].type = .water
+                    tiles[gridHeight - 1 - depth][x].type = .water
+                }
+            }
+            for y in depth..<(gridHeight - depth) {
+                // Left and right
+                if rng.randomDouble(in: 0...1) > 0.3 {
+                    tiles[y][depth].type = .water
+                    tiles[y][gridWidth - 1 - depth].type = .water
+                }
+            }
+        }
+        
+        // Generate moderate number of inland water bodies
+        let waterBodies = rng.randomInt(in: 5...10)
         for _ in 0..<waterBodies {
-            let centerX = rng.randomInt(in: 0..<gridWidth)
-            let centerY = rng.randomInt(in: 0..<gridHeight)
-            let size = rng.randomInt(in: 3...7)
+            // Keep water bodies away from edges
+            let centerX = rng.randomInt(in: 10..<(gridWidth - 10))
+            let centerY = rng.randomInt(in: 10..<(gridHeight - 10))
+            let size = rng.randomInt(in: 3...6)
             generateCluster(centerX: centerX, centerY: centerY, size: size, type: .water, rng: &rng)
         }
         
-        // Generate mountain ranges
-        let mountainRanges = rng.randomInt(in: 10...18)
+        // Generate mountain ranges (also away from borders)
+        let mountainRanges = rng.randomInt(in: 8...15)
         for _ in 0..<mountainRanges {
-            let centerX = rng.randomInt(in: 0..<gridWidth)
-            let centerY = rng.randomInt(in: 0..<gridHeight)
+            let centerX = rng.randomInt(in: 5..<(gridWidth - 5))
+            let centerY = rng.randomInt(in: 5..<(gridHeight - 5))
             let size = rng.randomInt(in: 4...8)
             generateCluster(centerX: centerX, centerY: centerY, size: size, type: .mountain, rng: &rng)
         }

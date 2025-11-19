@@ -18,7 +18,14 @@ class CityGridScene: SKScene {
     var city: City
     var onTileTap: ((Int, Int) -> Void)?
     var onTileLongPress: ((CGPoint, Int, Int) -> Void)?
-    var isMenuActive: Bool = false  // Disable touch when menu is showing
+    var isMenuActive: Bool = false {
+        didSet {
+            // Disable/enable user interaction on the SKView when menu state changes
+            skView?.isUserInteractionEnabled = !isMenuActive
+            print("SKView interaction enabled: \(!isMenuActive)")
+        }
+    }
+    weak var skView: SKView?  // Disable touch when menu is showing
     
     private let tileSize: CGFloat = 32
     private var tileNodes: [[SKSpriteNode]] = []
@@ -27,8 +34,11 @@ class CityGridScene: SKScene {
     private var cameraNode: SKCameraNode!
     
     // Zoom limits
-    private let minZoom: CGFloat = 0.3  // Can zoom in very close
+    private let minZoom: CGFloat = 0.1  // Can zoom in very close
     private let maxZoom: CGFloat = 5.0  // Can zoom out very far
+    
+    // Highlight for selected tile
+    private var highlightNode: SKShapeNode?
     
     init(city: City, size: CGSize) {
         self.city = city
@@ -51,10 +61,14 @@ class CityGridScene: SKScene {
         addChild(cameraNode)
         camera = cameraNode
         
-        // Position camera at center of map
-        let centerX = CGFloat(city.gridWidth) * tileSize / 2
-        let centerY = CGFloat(city.gridHeight) * tileSize / 2
-        cameraNode.position = CGPoint(x: centerX, y: centerY)
+        // Position camera at a random buildable location on the island
+        // Avoid the water borders (first/last 10 tiles)
+        let margin: CGFloat = 10
+        let maxX = CGFloat(city.gridWidth) - margin
+        let maxY = CGFloat(city.gridHeight) - margin
+        let randomX = CGFloat.random(in: margin...maxX) * tileSize
+        let randomY = CGFloat.random(in: margin...maxY) * tileSize
+        cameraNode.position = CGPoint(x: randomX, y: randomY)
         
         // Start zoomed in with very big tiles (~6-8 tiles on screen)
         cameraNode.setScale(0.4)
@@ -222,7 +236,9 @@ class CityGridScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         // Ignore all touches if menu is active
-        guard !isMenuActive else { return }
+        if isMenuActive {
+            print("Touch ended but menu is active - allowing cleanup")
+        }
         
         guard let allTouches = event?.allTouches else { return }
         
@@ -230,7 +246,8 @@ class CityGridScene: SKScene {
         if allTouches.count == 1, 
            let touch = touches.first,
            let startLocation = lastTouchLocations[touch],
-           !longPressTriggered {
+           !longPressTriggered,
+           !isMenuActive {
             let endLocation = touch.location(in: self)
             let distance = hypot(endLocation.x - startLocation.x, endLocation.y - startLocation.y)
             let elapsed = Date().timeIntervalSince1970 - touchStartTime
@@ -257,6 +274,8 @@ class CityGridScene: SKScene {
         
         touchStartLocation = nil
         longPressTriggered = false
+        
+        print("Touch ended, isMenuActive = \(isMenuActive)")
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -265,6 +284,11 @@ class CityGridScene: SKScene {
         }
         initialPinchDistance = nil
         initialCameraScale = nil
+        touchStartLocation = nil
+        longPressTriggered = false
+        
+        // Safety: ensure menu isn't stuck
+        print("Touches cancelled, resetting state")
     }
     
     #elseif os(macOS)
@@ -291,6 +315,12 @@ class CityGridScene: SKScene {
         // Validate bounds
         guard x >= 0, x < city.gridWidth, y >= 0, y < city.gridHeight else { return }
         
+        // Highlight the selected tile
+        showHighlight(at: x, y: y)
+        
+        // Move camera to center on this tile
+        focusCamera(on: x, y: y)
+        
         // Haptic feedback
         #if os(iOS)
         let feedback = UIImpactFeedbackGenerator(style: .medium)
@@ -302,26 +332,55 @@ class CityGridScene: SKScene {
         onTileLongPress?(screenLocation, x, y)
     }
     
+    /// Show highlight on a specific tile
+    func showHighlight(at x: Int, y: Int) {
+        // Remove old highlight if exists
+        highlightNode?.removeFromParent()
+        
+        // Create new highlight
+        let rect = CGRect(x: -tileSize / 2, y: -tileSize / 2, width: tileSize, height: tileSize)
+        let highlight = SKShapeNode(rect: rect, cornerRadius: 2)
+        highlight.fillColor = SKColor.white.withAlphaComponent(0.4)
+        highlight.strokeColor = SKColor.white
+        highlight.lineWidth = 3
+        highlight.zPosition = 10  // On top of everything
+        
+        // Position at the tile
+        highlight.position = CGPoint(
+            x: CGFloat(x) * tileSize + tileSize / 2,
+            y: CGFloat(city.gridHeight - y - 1) * tileSize + tileSize / 2
+        )
+        
+        // Pulsing animation
+        let pulse = SKAction.sequence([
+            SKAction.scale(to: 1.1, duration: 0.5),
+            SKAction.scale(to: 1.0, duration: 0.5)
+        ])
+        highlight.run(SKAction.repeatForever(pulse))
+        
+        addChild(highlight)
+        highlightNode = highlight
+    }
+    
+    /// Remove the highlight
+    func hideHighlight() {
+        highlightNode?.removeFromParent()
+        highlightNode = nil
+    }
+    
+    /// Focus camera on a specific tile
+    private func focusCamera(on x: Int, y: Int) {
+        let targetX = CGFloat(x) * tileSize + tileSize / 2
+        let targetY = CGFloat(city.gridHeight - y - 1) * tileSize + tileSize / 2
+        
+        let move = SKAction.move(to: CGPoint(x: targetX, y: targetY), duration: 0.3)
+        move.timingMode = .easeInEaseOut
+        cameraNode.run(move)
+    }
+    
     /// Convert TileType to SKColor
     private func uiColor(for tileType: TileType) -> SKColor {
-        switch tileType {
-        case .empty:
-            return SKColor.gray.withAlphaComponent(0.3)
-        case .residential:
-            return SKColor.green
-        case .commercial:
-            return SKColor.blue
-        case .industrial:
-            return SKColor.orange
-        case .park:
-            return SKColor.systemTeal
-        case .military:
-            return SKColor.red
-        case .water:
-            return SKColor.cyan
-        case .mountain:
-            return SKColor.brown
-        }
+        return tileType.skColor
     }
 }
 

@@ -12,6 +12,9 @@ struct SettingsBar: View {
     let speed: Double
     let onTogglePause: () -> Void
     let onCycleSpeed: () -> Void
+    let onExitToMenu: (() -> Void)?
+    
+    @State private var showExitConfirmation = false
     
     var body: some View {
         HStack(spacing: 20) {
@@ -45,6 +48,28 @@ struct SettingsBar: View {
             }
             
             Spacer()
+            
+            // Exit to menu button (only if handler provided)
+            if let onExitToMenu = onExitToMenu {
+                Button {
+                    showExitConfirmation = true
+                } label: {
+                    Image(systemName: "house.fill")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.red)
+                        .cornerRadius(8)
+                }
+                .confirmationDialog("Exit to Main Menu?", isPresented: $showExitConfirmation) {
+                    Button("Exit", role: .destructive) {
+                        onExitToMenu()
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Your progress will be saved.")
+                }
+            }
         }
         .padding(.horizontal)
         .padding(.top, 8)
@@ -61,9 +86,9 @@ struct SettingsBar: View {
 
 #Preview {
     VStack {
-        SettingsBar(isPaused: false, speed: 1.0, onTogglePause: {}, onCycleSpeed: {})
-        SettingsBar(isPaused: true, speed: 1.0, onTogglePause: {}, onCycleSpeed: {})
-        SettingsBar(isPaused: false, speed: 2.0, onTogglePause: {}, onCycleSpeed: {})
+        SettingsBar(isPaused: false, speed: 1.0, onTogglePause: {}, onCycleSpeed: {}, onExitToMenu: nil)
+        SettingsBar(isPaused: true, speed: 1.0, onTogglePause: {}, onCycleSpeed: {}, onExitToMenu: {})
+        SettingsBar(isPaused: false, speed: 2.0, onTogglePause: {}, onCycleSpeed: {}, onExitToMenu: {})
     }
 }
 

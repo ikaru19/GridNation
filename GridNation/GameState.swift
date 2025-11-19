@@ -27,8 +27,8 @@ class GameState {
     private var tickTimer: Timer?
     private var eventSpawnCounter: Double = 0
     
-    init() {
-        self.world = World()
+    init(seed: Int? = nil) {
+        self.world = World(seed: seed)
         self.isPaused = false
         self.speed = 1.0
         self.lastTickTime = Date()
@@ -129,6 +129,9 @@ class GameState {
         // Re-enable map interaction
         print("Setting isMenuActive = false")
         gridScene?.isMenuActive = false
+        
+        // Remove highlight
+        gridScene?.hideHighlight()
     }
     
     /// Place selected tile type at stored coordinates
@@ -140,7 +143,17 @@ class GameState {
         // Update SpriteKit scene immediately for responsive feedback
         gridScene?.updateTile(at: coords.x, y: coords.y, type: tileType)
         
+        print("Tile placed, hiding selector...")
         hideTileSelector()
+        
+        // Extra safety: ensure state is clean after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            print("Safety check: isMenuActive = \(self?.gridScene?.isMenuActive ?? false)")
+            if self?.gridScene?.isMenuActive == true {
+                print("WARNING: Menu still active, forcing reset")
+                self?.gridScene?.isMenuActive = false
+            }
+        }
     }
     
     /// Handle event choice selection

@@ -8,8 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var showGame = false
+    @State private var gameState: GameState?
+    
     var body: some View {
-        GameView()
+        if showGame, let gameState = gameState {
+            GameView(gameState: gameState, onExitToMenu: {
+                showGame = false
+            })
+        } else {
+            MainMenuView(showGame: $showGame, gameState: $gameState)
+        }
     }
 }
 

@@ -11,6 +11,8 @@ struct HUDView: View {
     let city: City
     let globalState: GlobalState
     
+    @State private var showDetailedStats = false
+    
     var body: some View {
         VStack(spacing: 8) {
             // Money
@@ -56,6 +58,12 @@ struct HUDView: View {
         .padding(10)
         .background(Color.black.opacity(0.8))
         .cornerRadius(12)
+        .onTapGesture {
+            showDetailedStats = true
+        }
+        .sheet(isPresented: $showDetailedStats) {
+            DetailedStatsView(city: city, globalState: globalState)
+        }
     }
     
     private var populationCapacity: Int {
@@ -122,5 +130,184 @@ struct CompactStatLabel: View {
     HUDView(city: City(), globalState: GlobalState())
         .padding()
         .background(Color.gray)
+}
+
+/// Detailed statistics popup
+struct DetailedStatsView: View {
+    let city: City
+    let globalState: GlobalState
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Economy Section
+                    StatSection(title: "Economy", icon: "dollarsign.circle.fill", color: .green) {
+                        StatRow(label: "Treasury", value: String(format: "$%.0f", city.money))
+                        StatRow(label: "Income/Tick", value: incomePerTick)
+                    }
+                    
+                    // Population Section
+                    StatSection(title: "Population", icon: "person.3.fill", color: .blue) {
+                        StatRow(label: "Citizens", value: "\(city.population)")
+                        StatRow(label: "Capacity", value: "\(populationCapacity)")
+                        StatRow(label: "Utilization", value: String(format: "%.1f%%", populationUtilization))
+                        StatRow(label: "Growth Rate", value: growthRate)
+                    }
+                    
+                    // Employment Section
+                    StatSection(title: "Employment", icon: "briefcase.fill", color: .orange) {
+                        StatRow(label: "Available Jobs", value: "\(availableJobs)")
+                        StatRow(label: "Employed", value: "\(min(city.population, availableJobs))")
+                        StatRow(label: "Unemployed", value: "\(max(0, city.population - availableJobs))")
+                        StatRow(label: "Unemployment", value: String(format: "%.1f%%", unemploymentRate))
+                    }
+                    
+                    // City Infrastructure
+                    StatSection(title: "Infrastructure", icon: "building.2.fill", color: .purple) {
+                        StatRow(label: "Residential", value: "\(city.countTiles(of: .residential))")
+                        StatRow(label: "Commercial", value: "\(city.countTiles(of: .commercial))")
+                        StatRow(label: "Industrial", value: "\(city.countTiles(of: .industrial))")
+                        StatRow(label: "Parks", value: "\(city.countTiles(of: .park))")
+                        StatRow(label: "Military", value: "\(city.countTiles(of: .military))")
+                        StatRow(label: "Total Built", value: "\(totalBuiltTiles)")
+                    }
+                    
+                    // Happiness & Stability
+                    StatSection(title: "Happiness", icon: "heart.fill", color: .red) {
+                        StatRow(label: "Stability", value: String(format: "%.1f%%", city.stability))
+                        StatRow(label: "Status", value: stabilityStatus)
+                    }
+                    
+                    // World Relations
+                    StatSection(title: "World Relations", icon: "globe", color: .cyan) {
+                        StatRow(label: "World Tension", value: String(format: "%.1f%%", globalState.worldTension))
+                        StatRow(label: "Status", value: tensionStatus)
+                    }
+                    
+                    // Map Info
+                    StatSection(title: "Map", icon: "map.fill", color: .brown) {
+                        StatRow(label: "Size", value: "\(city.gridWidth)×\(city.gridHeight)")
+                        StatRow(label: "Total Tiles", value: "\(city.gridWidth * city.gridHeight)")
+                        StatRow(label: "Seed", value: "\(city.seed)")
+                    }
+                }
+                .padding()
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("City Statistics")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var populationCapacity: Int {
+        city.countTiles(of: .residential) * 30
+    }
+    
+    private var availableJobs: Int {
+        (city.countTiles(of: .commercial) + city.countTiles(of: .industrial)) * 20
+    }
+    
+    private var populationUtilization: Double {
+        guard populationCapacity > 0 else { return 0 }
+        return Double(city.population) / Double(populationCapacity) * 100
+    }
+    
+    private var unemploymentRate: Double {
+        guard city.population > 0 else { return 0 }
+        let unemployed = max(0, city.population - availableJobs)
+        return Double(unemployed) / Double(city.population) * 100
+    }
+    
+    private var incomePerTick: String {
+        let commercial = city.countTiles(of: .commercial)
+        let industrial = city.countTiles(of: .industrial)
+        let income = commercial * 10 + industrial * 5
+        return "+$\(income)"
+    }
+    
+    private var growthRate: String {
+        let residential = city.countTiles(of: .residential)
+        if residential == 0 { return "No housing" }
+        if city.population >= populationCapacity { return "At capacity" }
+        if unemploymentRate > 50 { return "Slow (high unemployment)" }
+        if city.stability < 40 { return "Slow (low stability)" }
+        return "Normal"
+    }
+    
+    private var totalBuiltTiles: Int {
+        city.countTiles(of: .residential) +
+        city.countTiles(of: .commercial) +
+        city.countTiles(of: .industrial) +
+        city.countTiles(of: .park) +
+        city.countTiles(of: .military)
+    }
+    
+    private var stabilityStatus: String {
+        if city.stability > 70 { return "😊 Happy" }
+        if city.stability > 40 { return "😐 Neutral" }
+        return "😢 Unhappy"
+    }
+    
+    private var tensionStatus: String {
+        if globalState.worldTension < 30 { return "🕊️ Peaceful" }
+        if globalState.worldTension < 60 { return "⚠️ Tense" }
+        return "⚔️ Hostile"
+    }
+}
+
+/// Section container for stats
+struct StatSection<Content: View>: View {
+    let title: String
+    let icon: String
+    let color: Color
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .font(.title3)
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+            
+            VStack(spacing: 8) {
+                content
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+    }
+}
+
+/// Individual stat row
+struct StatRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+        }
+    }
 }
 

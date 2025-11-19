@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SpriteKit
 
 /// Represents different types of tiles on the grid
 enum TileType: String, Codable, CaseIterable {
@@ -21,25 +22,48 @@ enum TileType: String, Codable, CaseIterable {
     case water      // Cannot build here
     case mountain   // Cannot build here
     
-    /// The color used to render this tile type
+    /// The color used to render this tile type (SwiftUI Color)
     var color: Color {
         switch self {
         case .empty:
             return Color.gray.opacity(0.3)
         case .residential:
-            return Color.green
+            return Color.yellow
         case .commercial:
             return Color.blue
         case .industrial:
             return Color.orange
         case .park:
-            return Color.mint
+            return Color.green
         case .military:
             return Color.red
         case .water:
             return Color.cyan
         case .mountain:
             return Color.brown
+        }
+    }
+    
+    /// The color used for SpriteKit rendering (SKColor)
+    /// This uses the same color definitions as the SwiftUI color
+    var skColor: SKColor {
+        switch self {
+        case .empty:
+            return SKColor.gray.withAlphaComponent(0.3)
+        case .residential:
+            return SKColor.yellow
+        case .commercial:
+            return SKColor.blue
+        case .industrial:
+            return SKColor.orange
+        case .park:
+            return SKColor.green
+        case .military:
+            return SKColor.red
+        case .water:
+            return SKColor.cyan
+        case .mountain:
+            return SKColor.brown
         }
     }
     

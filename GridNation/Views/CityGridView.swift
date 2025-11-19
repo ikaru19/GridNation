@@ -51,6 +51,7 @@ struct SpriteKitContainer: UIViewRepresentable {
         let gridScene = CityGridScene(city: city, size: sceneSize)
         gridScene.onTileTap = onTileTap
         gridScene.onTileLongPress = onTileLongPress
+        gridScene.skView = skView  // Store reference to SKView
         
         // Store scene reference
         DispatchQueue.main.async {

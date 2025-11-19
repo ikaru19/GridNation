@@ -63,6 +63,14 @@ struct TileLegendView: View {
                                             Text("20 jobs/tile")
                                                 .font(.system(size: 9))
                                                 .foregroundColor(.white.opacity(0.5))
+                                        } else if type == .park {
+                                            Text("+10 stability")
+                                                .font(.system(size: 9))
+                                                .foregroundColor(.white.opacity(0.5))
+                                        } else if type == .military {
+                                            Text("-5 tension")
+                                                .font(.system(size: 9))
+                                                .foregroundColor(.white.opacity(0.5))
                                         }
                                     }
                                 }

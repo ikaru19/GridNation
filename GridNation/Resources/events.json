@@ -256,6 +256,351 @@
           "moneyChange": 0
         }
       ]
+    },
+    {
+      "id": "factory_sabotage",
+      "title": "Industrial Sabotage",
+      "description": "Mysterious explosions have damaged one of your industrial sites. Intelligence suspects a neighboring country.",
+      "type": "political",
+      "minPopulation": 20,
+      "minIndustrial": 2,
+      "minWorldTension": 10,
+      "choices": [
+        {
+          "text": "Launch full investigation",
+          "stabilityChange": 10,
+          "moneyChange": -200,
+          "worldTensionChange": 5
+        },
+        {
+          "text": "Blame the neighbor publicly",
+          "stabilityChange": 0,
+          "moneyChange": 0,
+          "worldTensionChange": 15
+        },
+        {
+          "text": "Downplay the incident",
+          "stabilityChange": -5,
+          "moneyChange": 0,
+          "worldTensionChange": 0
+        }
+      ]
+    },
+    {
+      "id": "annexation_opportunity",
+      "title": "Weak Neighbor Regime",
+      "description": "A neighboring government is facing internal turmoil. Some advisors suggest this is the perfect time to annex border territory.",
+      "type": "political",
+      "minPopulation": 25,
+      "minMilitary": 2,
+      "maxWorldTension": 60,
+      "choices": [
+        {
+          "text": "Annex their border region",
+          "stabilityChange": 15,
+          "moneyChange": -300,
+          "worldTensionChange": 25
+        },
+        {
+          "text": "Support friendly factions instead",
+          "stabilityChange": 5,
+          "moneyChange": -150,
+          "worldTensionChange": 10
+        },
+        {
+          "text": "Stay neutral",
+          "stabilityChange": 0,
+          "moneyChange": 0,
+          "worldTensionChange": 0
+        }
+      ]
+    },
+    {
+      "id": "refugee_influx",
+      "title": "Refugee Influx",
+      "description": "Conflict in a neighboring country has sent refugees toward your borders.",
+      "type": "riot",
+      "minPopulation": 20,
+      "minWorldTension": 30,
+      "choices": [
+        {
+          "text": "Open borders and integrate refugees",
+          "stabilityChange": 10,
+          "moneyChange": -250,
+          "worldTensionChange": -5
+        },
+        {
+          "text": "Accept a limited number",
+          "stabilityChange": 0,
+          "moneyChange": -100,
+          "worldTensionChange": 0
+        },
+        {
+          "text": "Close the borders",
+          "stabilityChange": -15,
+          "moneyChange": 0,
+          "worldTensionChange": 10
+        }
+      ]
+    },
+    {
+      "id": "energy_crisis",
+      "title": "Energy Crisis",
+      "description": "Fuel prices have spiked due to regional instability, and your city is struggling to keep the lights on.",
+      "type": "riot",
+      "minPopulation": 20,
+      "minIndustrial": 2,
+      "choices": [
+        {
+          "text": "Subsidize energy costs",
+          "stabilityChange": 15,
+          "moneyChange": -400
+        },
+        {
+          "text": "Introduce rolling blackouts",
+          "stabilityChange": -10,
+          "moneyChange": 0
+        },
+        {
+          "text": "Raise energy prices",
+          "stabilityChange": -20,
+          "moneyChange": 200
+        }
+      ]
+    },
+    {
+      "id": "corruption_scandal",
+      "title": "Corruption Scandal",
+      "description": "Reports emerge that high-ranking officials have been embezzling public funds.",
+      "type": "riot",
+      "minPopulation": 15,
+      "maxStability": 70,
+      "choices": [
+        {
+          "text": "Launch public investigation",
+          "stabilityChange": 10,
+          "moneyChange": -150
+        },
+        {
+          "text": "Quietly reshuffle officials",
+          "stabilityChange": -5,
+          "moneyChange": -50
+        },
+        {
+          "text": "Deny allegations",
+          "stabilityChange": -20,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "foreign_aid_offer",
+      "title": "Foreign Aid Package",
+      "description": "A powerful nation offers financial aid in exchange for political alignment.",
+      "type": "political",
+      "minPopulation": 20,
+      "choices": [
+        {
+          "text": "Accept the aid and align with them",
+          "stabilityChange": 10,
+          "moneyChange": 500,
+          "worldTensionChange": 10
+        },
+        {
+          "text": "Accept quietly, avoid public alignment",
+          "stabilityChange": 0,
+          "moneyChange": 300,
+          "worldTensionChange": 5
+        },
+        {
+          "text": "Reject to remain independent",
+          "stabilityChange": 5,
+          "moneyChange": 0,
+          "worldTensionChange": -5
+        }
+      ]
+    },
+    {
+      "id": "cyber_attack",
+      "title": "Cyber Attack",
+      "description": "Your financial systems and infrastructure monitoring tools have been hit by a cyber attack.",
+      "type": "political",
+      "minPopulation": 15,
+      "minWorldTension": 20,
+      "choices": [
+        {
+          "text": "Harden systems and trace attacker",
+          "stabilityChange": 5,
+          "moneyChange": -250,
+          "worldTensionChange": 10
+        },
+        {
+          "text": "Pay for emergency recovery services",
+          "stabilityChange": 0,
+          "moneyChange": -150,
+          "worldTensionChange": 0
+        },
+        {
+          "text": "Ignore and hope for quick recovery",
+          "stabilityChange": -15,
+          "moneyChange": -50,
+          "worldTensionChange": 0
+        }
+      ]
+    },
+    {
+      "id": "smuggling_ring",
+      "title": "Smuggling Ring Exposed",
+      "description": "Authorities uncover a major smuggling operation using your city as a transit hub.",
+      "type": "neutral",
+      "minPopulation": 20,
+      "choices": [
+        {
+          "text": "Crack down hard",
+          "stabilityChange": 10,
+          "moneyChange": -200
+        },
+        {
+          "text": "Quietly tax the operation",
+          "stabilityChange": -5,
+          "moneyChange": 250
+        },
+        {
+          "text": "Look the other way",
+          "stabilityChange": -10,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "drought_warning",
+      "title": "Drought Warning",
+      "description": "Meteorologists predict an unusually long dry season. Water supplies may be strained.",
+      "type": "riot",
+      "minPopulation": 10,
+      "choices": [
+        {
+          "text": "Invest in water infrastructure",
+          "stabilityChange": 10,
+          "moneyChange": -300
+        },
+        {
+          "text": "Implement water rationing",
+          "stabilityChange": -5,
+          "moneyChange": -50
+        },
+        {
+          "text": "Ignore warnings",
+          "stabilityChange": -15,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "national_festival",
+      "title": "National Festival",
+      "description": "Organizers propose a grand national festival to boost morale.",
+      "type": "good",
+      "minPopulation": 15,
+      "choices": [
+        {
+          "text": "Fund a large festival",
+          "stabilityChange": 20,
+          "moneyChange": -300
+        },
+        {
+          "text": "Approve a modest celebration",
+          "stabilityChange": 10,
+          "moneyChange": -150
+        },
+        {
+          "text": "Cancel the idea",
+          "stabilityChange": -5,
+          "moneyChange": 0
+        }
+      ]
+    },
+    {
+      "id": "military_coup_risk",
+      "title": "Coup Rumors",
+      "description": "Rumors spread that dissatisfied generals are discussing a coup.",
+      "type": "political",
+      "minPopulation": 20,
+      "maxStability": 40,
+      "minMilitary": 2,
+      "choices": [
+        {
+          "text": "Increase military budget and appease them",
+          "stabilityChange": 10,
+          "moneyChange": -300,
+          "worldTensionChange": 5
+        },
+        {
+          "text": "Replace disloyal officers",
+          "stabilityChange": -5,
+          "moneyChange": -150,
+          "worldTensionChange": 10
+        },
+        {
+          "text": "Ignore the rumors",
+          "stabilityChange": -20,
+          "moneyChange": 0,
+          "worldTensionChange": 0
+        }
+      ]
+    },
+    {
+      "id": "sanctions_threat",
+      "title": "Sanctions Threat",
+      "description": "International organizations threaten sanctions over your recent actions.",
+      "type": "political",
+      "minPopulation": 25,
+      "minWorldTension": 50,
+      "choices": [
+        {
+          "text": "Concede and roll back policies",
+          "stabilityChange": -5,
+          "moneyChange": 0,
+          "worldTensionChange": -15
+        },
+        {
+          "text": "Seek alternative partners",
+          "stabilityChange": 0,
+          "moneyChange": -200,
+          "worldTensionChange": -5
+        },
+        {
+          "text": "Defy the sanctions",
+          "stabilityChange": -15,
+          "moneyChange": -300,
+          "worldTensionChange": 10
+        }
+      ]
+    },
+    {
+      "id": "housing_shortage",
+      "title": "Housing Shortage",
+      "description": "Citizens complain about overcrowding and lack of affordable housing.",
+      "type": "riot",
+      "minPopulation": 25,
+      "minResidential": 2,
+      "choices": [
+        {
+          "text": "Subsidize new housing projects",
+          "stabilityChange": 15,
+          "moneyChange": -300
+        },
+        {
+          "text": "Relax building regulations",
+          "stabilityChange": 5,
+          "moneyChange": -100
+        },
+        {
+          "text": "Ignore the complaints",
+          "stabilityChange": -15,
+          "moneyChange": 0
+        }
+      ]
     }
   ]
 }

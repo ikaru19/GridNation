@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct GameView: View {
-    @State private var gameState = GameState()
+    @State var gameState: GameState
+    let onExitToMenu: () -> Void
     
     var body: some View {
         ZStack {
@@ -36,7 +37,8 @@ struct GameView: View {
                     },
                     onCycleSpeed: {
                         gameState.cycleSpeed()
-                    }
+                    },
+                    onExitToMenu: onExitToMenu
                 )
                 
                 Spacer()
@@ -105,8 +107,3 @@ struct GameView: View {
         }
     }
 }
-
-#Preview {
-    GameView()
-}
-
